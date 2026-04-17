@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Net.Http.Headers;
 
 namespace System.Net.Http
@@ -11,8 +10,8 @@ namespace System.Net.Http
     {
         public static void CopyTo(this HttpContentHeaders fromHeaders, HttpContentHeaders toHeaders)
         {
-            Contract.Assert(fromHeaders != null, "fromHeaders cannot be null.");
-            Contract.Assert(toHeaders != null, "toHeaders cannot be null.");
+            ArgumentNullException.ThrowIfNull(fromHeaders);
+            ArgumentNullException.ThrowIfNull(toHeaders);
 
             foreach (KeyValuePair<string, IEnumerable<string>> header in fromHeaders)
             {

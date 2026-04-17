@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Internal;
 
@@ -20,9 +19,9 @@ namespace System.Net.Http.Handlers
         public ProgressWriteAsyncResult(Stream innerStream, ProgressStream progressStream, byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
             : base(callback, state)
         {
-            Contract.Assert(innerStream != null);
-            Contract.Assert(progressStream != null);
-            Contract.Assert(buffer != null);
+            ArgumentNullException.ThrowIfNull(innerStream);
+            ArgumentNullException.ThrowIfNull(progressStream);
+            ArgumentNullException.ThrowIfNull(buffer);
 
             _innerStream = innerStream;
             _progressStream = progressStream;

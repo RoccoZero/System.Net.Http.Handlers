@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Internal;
 using System.Threading;
@@ -92,7 +91,7 @@ namespace System.Net.Http.Handlers
             ReportBytesSent(1, userState: null);
         }
 
-       public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             await InnerStream.WriteAsync(buffer, offset, count, cancellationToken);
             ReportBytesSent(count, userState: null);

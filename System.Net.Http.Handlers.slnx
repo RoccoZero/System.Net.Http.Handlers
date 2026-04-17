@@ -1,3 +1,9 @@
 <Solution>
-  <Project Path="System.Net.Http.Handlers.csproj" />
+  <Folder Name="/Solution Items/">
+    <File Path=".gitattributes" />
+    <File Path=".github/workflows/publish-nuget.yml" />
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="src/System.Net.Http.Handlers/System.Net.Http.Handlers.csproj" />
 </Solution>
