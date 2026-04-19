@@ -2,7 +2,7 @@
 
 Simple progress tracking for `HttpClient` via `DelegatingHandler`.
 
-This package is based on the original `ProgressMessageHandler` from ASP.NET Web Stack (`System.Net.Http.Handlers`) and adapts the same idea for modern .NET. The original source lives in the `aspnet/AspNetWebStack` repository under
+This package is based on the original `ProgressMessageHandler` from ASP.NET Web Stack (`System.Net.Http.Handlers`) and adapts the same idea for modern .NET. The original source lives in the `aspnet/AspNetWebStack` repository.
 
 ## Install
 
