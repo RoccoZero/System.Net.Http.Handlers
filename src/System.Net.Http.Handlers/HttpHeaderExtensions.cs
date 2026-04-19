@@ -1,19 +1,20 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Net.Http.Headers;
 
-namespace System.Net.Http
+namespace System.Net.Http;
+
+internal static class HttpHeaderExtensions
 {
-    internal static class HttpHeaderExtensions
+    extension(HttpContentHeaders fromHeaders)
     {
-        public static void CopyTo(this HttpContentHeaders fromHeaders, HttpContentHeaders toHeaders)
+        public void CopyTo(HttpContentHeaders toHeaders)
         {
             ArgumentNullException.ThrowIfNull(fromHeaders);
             ArgumentNullException.ThrowIfNull(toHeaders);
 
-            foreach (KeyValuePair<string, IEnumerable<string>> header in fromHeaders)
+            foreach (var header in fromHeaders)
             {
                 toHeaders.TryAddWithoutValidation(header.Key, header.Value);
             }

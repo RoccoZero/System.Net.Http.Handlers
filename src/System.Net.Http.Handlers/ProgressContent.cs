@@ -4,52 +4,48 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace System.Net.Http.Handlers
+namespace System.Net.Http.Handlers;
+
+/// <summary>
+/// Wraps an inner <see cref="HttpContent"/> in order to insert a <see cref="ProgressStream"/> on writing data.
+/// </summary>
+internal sealed class ProgressContent : HttpContent
 {
-    /// <summary>
-    /// Wraps an inner <see cref="HttpContent"/> in order to insert a <see cref="ProgressStream"/> on writing data.
-    /// </summary>
-    internal class ProgressContent : HttpContent
+    private readonly HttpContent _innerContent;
+    private readonly ProgressMessageHandler _handler;
+    private readonly HttpRequestMessage _request;
+
+    public ProgressContent(HttpContent innerContent, ProgressMessageHandler handler, HttpRequestMessage request)
     {
-        private readonly HttpContent _innerContent;
-        private readonly ProgressMessageHandler _handler;
-        private readonly HttpRequestMessage _request;
+        _innerContent = innerContent;
+        _handler = handler;
+        _request = request;
 
-        public ProgressContent(HttpContent innerContent, ProgressMessageHandler handler, HttpRequestMessage request)
+        innerContent.Headers.CopyTo(Headers);
+    }
+
+    protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context) => _innerContent.CopyToAsync(new ProgressStream(stream, _handler, _request));
+
+    protected override bool TryComputeLength(out long length)
+    {
+        var contentLength = _innerContent.Headers.ContentLength;
+        if (contentLength.HasValue)
         {
-            _innerContent = innerContent;
-            _handler = handler;
-            _request = request;
-
-            innerContent.Headers.CopyTo(Headers);
+            length = contentLength.Value;
+            return true;
         }
 
-        protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context)
-        {
-            ProgressStream progressStream = new ProgressStream(stream, _handler, _request, response: null);
-            return _innerContent.CopyToAsync(progressStream);
-        }
+        length = -1;
+        return false;
+    }
 
-        protected override bool TryComputeLength(out long length)
-        {
-            long? contentLength = _innerContent.Headers.ContentLength;
-            if (contentLength.HasValue)
-            {
-                length = contentLength.Value;
-                return true;
-            }
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
 
-            length = -1;
-            return false;
-        }
-
-        protected override void Dispose(bool disposing)
+        if (disposing)
         {
-            base.Dispose(disposing);
-            if (disposing)
-            {
-                _innerContent.Dispose();
-            }
+            _innerContent.Dispose();
         }
     }
 }
