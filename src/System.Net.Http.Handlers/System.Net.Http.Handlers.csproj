@@ -13,7 +13,7 @@
     <PackageId>RoccoZero.System.Net.Http.Handlers</PackageId>
     <Authors>RoccoZero</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>csharp;dotnet</PackageTags>
+    <PackageTags>csharp;dotnet;ProgressMessageHandler</PackageTags>
     <RepositoryUrl>https://github.com/RoccoZero/System.Net.Http.Handlers</RepositoryUrl>
 
     <!-- Enable Source Link (for details, see https://github.com/dotnet/sourcelink/#using-sourcelink) -->
