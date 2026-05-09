@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Threading;
@@ -14,6 +14,11 @@ namespace System.Net.Http.Handlers;
 /// </summary>
 public class ProgressMessageHandler : DelegatingHandler
 {
+#if NET6_0_OR_GREATER
+    public static readonly HttpRequestOptionsKey<IProgress<HttpProgressEventArgs>> HttpSendProgressKey = new(nameof(HttpSendProgressKey));
+
+    public static readonly HttpRequestOptionsKey<IProgress<HttpProgressEventArgs>> HttpReceiveProgressKey = new(nameof(HttpReceiveProgressKey));
+#endif
     /// <summary>
     /// Initializes a new instance of the <see cref="ProgressMessageHandler"/> class.
     /// </summary>
@@ -42,11 +47,22 @@ public class ProgressMessageHandler : DelegatingHandler
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        AddRequestProgress(request);
+        if (HttpSendProgress is not null
+#if NET6_0_OR_GREATER
+            || request.Options.TryGetValue(HttpSendProgressKey, out _)
+#endif
+            )
+        {
+            AddRequestProgress(request);
+        }
 
         var response = await base.SendAsync(request, cancellationToken);
 
-        if (HttpReceiveProgress is not null && response.Content is not null)
+        if (HttpReceiveProgress is not null
+#if NET6_0_OR_GREATER
+            || request.Options.TryGetValue(HttpReceiveProgressKey, out _)
+#endif
+            )
         {
             cancellationToken.ThrowIfCancellationRequested();
             await AddResponseProgressAsync(request, response);
@@ -63,6 +79,12 @@ public class ProgressMessageHandler : DelegatingHandler
     protected internal virtual void OnHttpRequestProgress(HttpRequestMessage request, HttpProgressEventArgs e)
     {
         HttpSendProgress?.Invoke(request, e);
+#if NET6_0_OR_GREATER
+        if (request.Options.TryGetValue(HttpSendProgressKey, out var progress))
+        {
+            progress.Report(e);
+        }
+#endif
     }
 
     /// <summary>
@@ -73,15 +95,16 @@ public class ProgressMessageHandler : DelegatingHandler
     protected internal virtual void OnHttpResponseProgress(HttpRequestMessage request, HttpProgressEventArgs e)
     {
         HttpReceiveProgress?.Invoke(request, e);
+#if NET6_0_OR_GREATER
+        if (request.Options.TryGetValue(HttpReceiveProgressKey, out var progress))
+        {
+            progress.Report(e);
+        }
+#endif
     }
 
     private void AddRequestProgress(HttpRequestMessage request)
     {
-        if (HttpSendProgress is null)
-        {
-            return;
-        }
-
         if (request is not { Content: var content } || content is null)
         {
             return;
@@ -92,7 +115,11 @@ public class ProgressMessageHandler : DelegatingHandler
 
     private async Task<HttpResponseMessage> AddResponseProgressAsync(HttpRequestMessage request, HttpResponseMessage response)
     {
-        var content = response.Content;
+        if (response.Content is not HttpContent content)
+        {
+            return response;
+        }
+
         var stream = await content.ReadAsStreamAsync();
 
         var progressContent = new StreamContent(new ProgressStream(stream, this, request, response));
