@@ -9,7 +9,7 @@
 
     <NoWarn>$(NoWarn);1591</NoWarn>
 
-    <Version>1.0.6</Version>
+    <Version>1.0.7</Version>
     <PackageId>RoccoZero.System.Net.Http.Handlers</PackageId>
     <Authors>RoccoZero</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
