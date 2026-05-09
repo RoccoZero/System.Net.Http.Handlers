@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.IO;
@@ -71,6 +71,15 @@ internal sealed class ProgressStream : DelegatingStream
         return readCount;
     }
 
+#if NET6_0_OR_GREATER
+    public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+    {
+        var readCount = await InnerStream.ReadAsync(buffer, cancellationToken);
+        ReportBytesReceived(readCount, userState: null);
+        return readCount;
+    }
+#endif
+
     public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
     {
         return InnerStream.BeginRead(buffer, offset, count, callback, state);
@@ -104,6 +113,14 @@ internal sealed class ProgressStream : DelegatingStream
 #endif
         ReportBytesSent(count, userState: null);
     }
+
+#if NET6_0_OR_GREATER
+    public override async ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
+    {
+        await InnerStream.WriteAsync(buffer, cancellationToken);
+        ReportBytesSent(buffer.Length, userState: null);
+    }
+#endif
 
     public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
     {
